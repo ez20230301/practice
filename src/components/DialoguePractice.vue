@@ -135,8 +135,7 @@ onUnmounted(() => {
     padding: 20px;
     margin-bottom: 20px;
     background: #f9f9f9;
-    padding-bottom: 100px;
-    /* 增加底部内边距 */
+    padding-bottom: 200px;
 }
 
 .message {
