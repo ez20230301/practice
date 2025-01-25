@@ -10,6 +10,9 @@
             <button @click="nextLine" :disabled="isLoading" class="next-button">
                 {{ isLoading ? '加载中...' : '下一句' }}
             </button>
+            <button @click="restartDialogue" :disabled="isLoading" class="restart-button">
+                重新开始
+            </button>
         </div>
 
         <div v-if="error" class="error-message">
@@ -31,7 +34,10 @@ const chatContainer = ref(null)
 const scrollToBottom = async () => {
     await nextTick()
     if (chatContainer.value) {
-        chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+        chatContainer.value.scrollTo({
+            top: chatContainer.value.scrollHeight,
+            behavior: 'smooth'
+        })
     }
 }
 
@@ -49,6 +55,9 @@ const startDialogue = async () => {
             role: 'assistant',
             content: response
         })
+
+        // 确保在初始消息添加后滚动到底部
+        await scrollToBottom()
     } catch (e) {
         error.value = '发生错误，请刷新页面重试'
         console.error(e)
@@ -70,12 +79,22 @@ const nextLine = async () => {
             role: 'assistant',
             content: response
         })
+
+        // 确保在消息添加后滚动到底部
+        await scrollToBottom()
     } catch (e) {
         error.value = '发生错误，请稍后重试'
         console.error(e)
     } finally {
         isLoading.value = false
     }
+}
+
+const restartDialogue = async () => {
+    if (isLoading.value) return
+
+    chatHistory.value = []
+    await startDialogue()
 }
 
 onMounted(() => {
@@ -120,6 +139,7 @@ onMounted(() => {
 .input-area {
     display: flex;
     justify-content: center;
+    gap: 10px;
     padding: 10px;
 }
 
@@ -140,6 +160,27 @@ onMounted(() => {
 }
 
 .next-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.restart-button {
+    padding: 12px 24px;
+    background: #ff5722;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    min-width: 120px;
+    transition: background-color 0.3s;
+}
+
+.restart-button:hover {
+    background: #f4511e;
+}
+
+.restart-button:disabled {
     background: #ccc;
     cursor: not-allowed;
 }
