@@ -6,6 +6,7 @@ const API_URL = 'https://api.deepseek.com/v1/chat/completions'
 
 const apiClient = axios.create({
     baseURL: 'https://api.deepseek.com',
+    timeout: 10000,
     headers: {
         'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
