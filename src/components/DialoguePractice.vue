@@ -8,7 +8,7 @@
 
         <div class="input-area">
             <button @click="nextLine" :disabled="isLoading" class="next-button">
-                {{ isLoading ? '加载中...' : '下一句' }}
+                {{ isLoading ? '加载中...' : '下一句(空格)' }}
             </button>
             <button @click="restartDialogue" :disabled="isLoading" class="restart-button">
                 重新开始
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, onUnmounted } from 'vue'
 import { initializeChat, chatWithAI } from '../api/chat'
 
 const chatHistory = ref([])
@@ -30,12 +30,21 @@ const isLoading = ref(false)
 const error = ref('')
 const chatContainer = ref(null)
 
-// 滚动到底部
+// 添加键盘事件处理
+const handleKeyPress = (event) => {
+    if (event.code === 'Space' && !isLoading.value) {
+        event.preventDefault() // 防止空格键滚动页面
+        nextLine()
+    }
+}
+
+// 修改滚动函数，增加底部留白
 const scrollToBottom = async () => {
     await nextTick()
     if (chatContainer.value) {
+        const extraSpace = 100 // 底部留白空间（像素）
         chatContainer.value.scrollTo({
-            top: chatContainer.value.scrollHeight,
+            top: chatContainer.value.scrollHeight - extraSpace,
             behavior: 'smooth'
         })
     }
@@ -99,6 +108,12 @@ const restartDialogue = async () => {
 
 onMounted(() => {
     startDialogue()
+    window.addEventListener('keydown', handleKeyPress)
+})
+
+// 清理事件监听
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyPress)
 })
 </script>
 
@@ -120,6 +135,8 @@ onMounted(() => {
     padding: 20px;
     margin-bottom: 20px;
     background: #f9f9f9;
+    padding-bottom: 100px;
+    /* 增加底部内边距 */
 }
 
 .message {
