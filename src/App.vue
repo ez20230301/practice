@@ -11,12 +11,12 @@ import DialoguePractice from './components/DialoguePractice.vue'
 
 <style>
 .app {
-  padding: 20px;
+  padding: 10px;
 }
 
 h1 {
   text-align: center;
   color: #333;
-  margin-bottom: 30px;
+  margin-bottom: 27px;
 }
 </style>

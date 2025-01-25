@@ -109,7 +109,7 @@ onMounted(() => {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    height: 80vh;
+    height: 70vh;
 }
 
 .chat-history {
