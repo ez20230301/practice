@@ -42,7 +42,7 @@ const handleKeyPress = (event) => {
 const scrollToBottom = async () => {
     await nextTick()
     if (chatContainer.value) {
-        const extraSpace = 100 // 底部留白空间（像素）
+        const extraSpace = 200 // 底部留白空间（像素）
         chatContainer.value.scrollTo({
             top: chatContainer.value.scrollHeight - extraSpace,
             behavior: 'smooth'
