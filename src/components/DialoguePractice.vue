@@ -1,0 +1,152 @@
+<template>
+    <div class="dialogue-container">
+        <div class="chat-history" ref="chatContainer">
+            <div v-for="(message, index) in chatHistory" :key="index" class="message">
+                {{ message.content }}
+            </div>
+        </div>
+
+        <div class="input-area">
+            <button @click="nextLine" :disabled="isLoading" class="next-button">
+                {{ isLoading ? '加载中...' : '下一句' }}
+            </button>
+        </div>
+
+        <div v-if="error" class="error-message">
+            {{ error }}
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref, onMounted, nextTick, watch } from 'vue'
+import { initializeChat, chatWithAI } from '../api/chat'
+
+const chatHistory = ref([])
+const isLoading = ref(false)
+const error = ref('')
+const chatContainer = ref(null)
+
+// 滚动到底部
+const scrollToBottom = async () => {
+    await nextTick()
+    if (chatContainer.value) {
+        chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+}
+
+// 监听聊天历史变化，自动滚动
+watch(chatHistory, () => {
+    scrollToBottom()
+})
+
+const startDialogue = async () => {
+    try {
+        isLoading.value = true
+        error.value = ''
+        const response = await initializeChat()
+        chatHistory.value.push({
+            role: 'assistant',
+            content: response
+        })
+    } catch (e) {
+        error.value = '发生错误，请刷新页面重试'
+        console.error(e)
+    } finally {
+        isLoading.value = false
+    }
+}
+
+const nextLine = async () => {
+    if (isLoading.value) return
+
+    try {
+        isLoading.value = true
+        error.value = ''
+
+        const response = await chatWithAI('继续')
+
+        chatHistory.value.push({
+            role: 'assistant',
+            content: response
+        })
+    } catch (e) {
+        error.value = '发生错误，请稍后重试'
+        console.error(e)
+    } finally {
+        isLoading.value = false
+    }
+}
+
+onMounted(() => {
+    startDialogue()
+})
+</script>
+
+<style scoped>
+.dialogue-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}
+
+.chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #f9f9f9;
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #fff;
+    border-left: 4px solid #2196f3;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    white-space: pre-wrap;
+    line-height: 1.5;
+    color: #333;
+    text-align: left;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.input-area {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+.next-button {
+    padding: 12px 24px;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    min-width: 120px;
+    transition: background-color 0.3s;
+}
+
+.next-button:hover {
+    background: #1976d2;
+}
+
+.next-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+}
+</style>
